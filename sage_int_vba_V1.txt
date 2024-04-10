@@ -1,0 +1,40 @@
+Sub ExtractDigits()
+    Dim cell As Range
+    Dim GL_Account, Location_ID, Department As String
+    Dim targetColumn As Integer
+    Dim selectedRange As Range
+    
+    ' Get the selected range
+    Set selectedRange = Selection
+    
+    ' Insert new columns for Location ID, GL Account, and Department
+    Columns(selectedRange.Columns(1).Column + 1).Resize(, 3).Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+    
+    ' Set the target column for Location ID, GL Account, and Department
+    targetColumn = selectedRange.Columns(1).Column + 1 ' Column after the selected range
+    
+    ' Set column headers
+    Cells(1, targetColumn).Value = "GL_Account"
+    Cells(1, targetColumn + 1).Value = "Location_ID"
+    Cells(1, targetColumn + 2).Value = "Department"
+    
+    For Each cell In selectedRange
+        'Extract GL Account (grouping of four) starting from the 9th position
+        GL_Account = Mid(cell.Value, 9, 4)
+        
+        'Put the extracted GL Account into adjacent cell in the target column
+        cell.Offset(0, targetColumn - 1).Value = GL_Account
+        
+        'Extract Location ID (first digit) starting from the 1st position
+        Location_ID = Mid(cell.Value, 1, 1)
+        
+        'Put the extracted Location ID into adjacent cell in the target column
+        cell.Offset(0, targetColumn).Value = Location_ID
+        
+        'Extract Department (three digits) starting from the 5th position
+        Department = Mid(cell.Value, 5, 3)
+        
+        'Put the extracted Department into next adjacent cell in the target column
+        cell.Offset(0, targetColumn + 1).Value = Department
+    Next cell
+End Sub
