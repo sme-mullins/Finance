@@ -33,6 +33,14 @@ Sub ExtractDigits()
         
         'Extract Department (three digits) starting from the 5th position
         Department = Mid(cell.Value, 5, 3)
+
+        ' Check if Department is 399 or less and replace with 100
+        If IsNumeric(Department) Then
+            If Val(Department) <= 399 Then
+                Department = "100"
+            End If
+        End If
+
         
         'Put the extracted Department into next adjacent cell in the target column
         cell.Offset(0, targetColumn + 1).Value = Department
