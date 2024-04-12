@@ -1,0 +1,39 @@
+Sub AddDateRanges()
+    Dim selectedRange As Range
+    Dim cell As Range
+    Dim currentDate As String
+    Dim count As Integer
+    
+    ' Check if a range is selected
+    If TypeName(Selection) <> "Range" Then
+        MsgBox "Please select a range of cells containing dates.", vbExclamation
+        Exit Sub
+    End If
+    
+    ' Set the selected range
+    Set selectedRange = Selection
+    
+    ' Initialize variables
+    count = 0
+    currentDate = ""
+    
+    ' Loop through each cell in the date range
+    For Each cell In Selection
+        If cell.Value <> "" Then
+            ' Check if the date has changed
+            If cell.Value <> currentDate Then
+                currentDate = cell.Value
+                count = 1  ' Reset count for a new date
+            Else
+                count = count + 1  ' Increment count for the same date
+            End If
+        End If
+        
+        ' Write the sequential number to the corresponding row in column B
+        cell.Offset(0, 1).Value = count
+    Next cell
+    
+    ' Clean up
+    Set selectedRange = Nothing
+End Sub
+
