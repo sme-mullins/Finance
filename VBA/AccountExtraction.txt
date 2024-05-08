@@ -1,23 +1,22 @@
 Sub AccountExtraction()
     Dim cell As Range
-    Dim GL_Account As String, Location_ID As String, Department As String, Sublocation_ID As String
+    Dim GL_Account As String, Location_ID As String, Department As String
     Dim targetColumn As Integer
     Dim selectedRange As Range
     
     ' Get the selected range
     Set selectedRange = Selection
     
-    ' Insert new columns for Location ID, GL Account, Department, and Sublocation ID
-    Columns(selectedRange.Columns(1).Column + 1).Resize(, 4).Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+    ' Insert new columns for Location ID, GL Account, and Department
+    Columns(selectedRange.Columns(1).Column + 1).Resize(, 3).Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
     
-    ' Set the target column for Location ID, GL Account, Department, and Sublocation ID
+    ' Set the target column for Location ID, GL Account, , and Department
     targetColumn = selectedRange.Columns(1).Column + 1 ' Column after the selected range
     
     ' Set column headers
     Cells(1, targetColumn).Value = "GL_Account"
     Cells(1, targetColumn + 1).Value = "Location_ID"
     Cells(1, targetColumn + 2).Value = "Department"
-    Cells(1, targetColumn + 3).Value = "Sublocation_ID"
     
     For Each cell In selectedRange
         'Extract GL Account (grouping of four) starting from the 9th position
@@ -51,8 +50,6 @@ Sub AccountExtraction()
     
         'Put the extracted Department into next adjacent cell in the target column
         cell.Offset(0, targetColumn + 1).Value = Department
-        
-        'Put the extracted Sublocation ID into next adjacent cell in the target column
-        cell.Offset(0, targetColumn + 2).Value = Sublocation_ID
+
     Next cell
 End Sub
