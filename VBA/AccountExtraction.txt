@@ -10,7 +10,7 @@ Sub AccountExtraction()
     ' Insert new columns for Location ID, GL Account, and Department
     Columns(selectedRange.Columns(1).Column + 1).Resize(, 3).Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
     
-    ' Set the target column for Location ID, GL Account, , and Department
+    ' Set the target column for Location ID, GL Account, and Department
     targetColumn = selectedRange.Columns(1).Column + 1 ' Column after the selected range
     
     ' Set column headers
