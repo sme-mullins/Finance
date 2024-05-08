@@ -1,0 +1,58 @@
+Sub AccountExtraction()
+    Dim cell As Range
+    Dim GL_Account As String, Location_ID As String, Department As String, Sublocation_ID As String
+    Dim targetColumn As Integer
+    Dim selectedRange As Range
+    
+    ' Get the selected range
+    Set selectedRange = Selection
+    
+    ' Insert new columns for Location ID, GL Account, Department, and Sublocation ID
+    Columns(selectedRange.Columns(1).Column + 1).Resize(, 4).Insert Shift:=xlToRight, CopyOrigin:=xlFormatFromLeftOrAbove
+    
+    ' Set the target column for Location ID, GL Account, Department, and Sublocation ID
+    targetColumn = selectedRange.Columns(1).Column + 1 ' Column after the selected range
+    
+    ' Set column headers
+    Cells(1, targetColumn).Value = "GL_Account"
+    Cells(1, targetColumn + 1).Value = "Location_ID"
+    Cells(1, targetColumn + 2).Value = "Department"
+    Cells(1, targetColumn + 3).Value = "Sublocation_ID"
+    
+    For Each cell In selectedRange
+        'Extract GL Account (grouping of four) starting from the 9th position
+        GL_Account = Mid(cell.Value, 9, 4)
+        
+        'Extract Location ID (first digit) starting from the 1st position
+        Location_ID = Mid(cell.Value, 1, 1)
+        
+        'Extract Department (three digits) starting from the 5th position
+        Department = Mid(cell.Value, 5, 3)
+
+        ' Check if Department is 399 or less and replace with 100
+        If Val(Department) <= 399 Then
+            Department = "100"
+        End If
+        
+        'Extract Sublocation ID (one digit) starting from the 15th position
+        Sublocation_ID = Mid(cell.Value, 15, 1)
+        
+        ' Check if GL account is 4440, department is 514, and sublocation is 1
+        If GL_Account = "4440" And Department = "514" And Sublocation_ID = "1" Then
+            ' Replace GL account with 4443
+            GL_Account = "4443"
+        End If
+    
+        'Put the extracted GL Account into adjacent cell in the target column
+        cell.Offset(0, targetColumn - 1).Value = GL_Account
+        
+        'Put the extracted Location ID into adjacent cell in the target column
+        cell.Offset(0, targetColumn).Value = Location_ID
+    
+        'Put the extracted Department into next adjacent cell in the target column
+        cell.Offset(0, targetColumn + 1).Value = Department
+        
+        'Put the extracted Sublocation ID into next adjacent cell in the target column
+        cell.Offset(0, targetColumn + 2).Value = Sublocation_ID
+    Next cell
+End Sub
