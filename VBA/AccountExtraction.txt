@@ -36,7 +36,7 @@ Sub AccountExtraction()
         'Extract Sublocation ID (one digit) starting from the 15th position
         Sublocation_ID = Mid(cell.Value, 15, 1)
         
-        ' Check if GL account is 4440, department is 514, and sublocation is 1
+        ' Check if GL account is 4440, department is 514, and sublocation is 1 - ebooks sales
         If GL_Account = "4440" And Department = "514" And Sublocation_ID = "1" Then
             ' Replace GL account with 4443
             GL_Account = "4443"
