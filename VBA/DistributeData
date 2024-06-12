@@ -70,13 +70,13 @@ Sub DistributeData()
             .Cells(destRow, 3).Value = wsSource.Cells(srcRow, 4).Value ' DATE
             
             ' Assign Sublocation_ID from Column A (15th character) to SUBLOCATION_ID column in journal entry sheet
-            .Cells(destRow, 24).Value = Mid(sourceValue, 15, 1) ' SUBLOCATION_ID
+            .Cells(destRow, 23).Value = Mid(sourceValue, 15, 1) ' SUBLOCATION_ID
             
             ' Check if GL account is 4440, department is 514, and sublocation is 1
             Dim glAccount As String
             glAccount = Mid(sourceValue, 9, 4) ' Extract GL_ACCOUNT from Column A
             
-            If glAccount = "4440" And deptID = "514" And .Cells(destRow, 24).Value = "1" Then
+            If glAccount = "4440" And deptID = "514" And .Cells(destRow, 23).Value = "1" Then
                 glAccount = "4443"
             End If
             
