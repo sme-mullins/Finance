@@ -1,0 +1,102 @@
+Sub DistributeData()
+    On Error GoTo ErrorHandler
+
+    Dim wsSource As Worksheet
+    Dim wsDestination As Worksheet
+    Dim sourceRange As Range
+    Dim lastRow As Long
+    
+    ' Set the source worksheet
+    Set wsSource = ThisWorkbook.Sheets("Sheet1")
+    
+    ' Find the last row with data in the source sheet
+    lastRow = wsSource.Cells(wsSource.Rows.Count, "A").End(xlUp).Row
+    
+    ' Select all fields from the source sheet
+    Set sourceRange = wsSource.Range("A1:D" & lastRow)
+    
+    ' Create a new sheet titled "journal entry"
+    Set wsDestination = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+    wsDestination.Name = "Journal Entry"
+    
+    ' Define the columns in the new sheet
+    Dim headers As Variant
+    headers = Array("DONOTIMPORT", "JOURNAL", "DATE", "REVERSEDATE", "DESCRIPTION", "SOURCEENTITY", "REFERENCE_NO", "LINE_NO", "ACCT_NO", _
+                    "LOCATION_ID", "DEPT_ID", "GLENTRY_CLASSID", "GLENTRY_CUSTOMERID", "GLENTRY_VENDORID", "GLENTRY_EMPLOYEEID", _
+                    "GLENTRY_ITEMID", "DEBIT", "CREDIT", "DOCUMENT", "MEMO", "STATE", "ALLOCATION_ID")
+                    
+    Dim i As Long ' Change to Long for consistency
+    For i = LBound(headers) To UBound(headers)
+        wsDestination.Cells(1, i + 1).Value = headers(i)
+    Next i
+    
+    ' Copy data from source sheet to the new sheet
+    Dim srcRow As Long
+    Dim destRow As Long
+    destRow = 2 ' Start copying to the second row of the destination sheet
+    
+    For srcRow = 1 To lastRow
+        With wsDestination
+            Dim sourceValue As Variant
+            sourceValue = wsSource.Cells(srcRow, 1).Value
+            
+            ' Extract and assign values from Column A
+            .Cells(destRow, 9).Value = Mid(sourceValue, 9, 4) ' ACCT_NO
+            .Cells(destRow, 10).Value = Mid(sourceValue, 1, 1) ' LOCATION_ID
+            .Cells(destRow, 11).Value = Mid(sourceValue, 5, 3) ' DEPT_ID
+            
+            ' Assign the second column from Sheet1 to the "DEBIT" column in the journal entry sheet
+            .Cells(destRow, 17).Value = wsSource.Cells(srcRow, 2).Value ' DEBIT
+            
+            ' Assign the fourth column from Sheet1 to the "DATE" column in the journal entry sheet
+            .Cells(destRow, 3).Value = wsSource.Cells(srcRow, 4).Value ' DATE
+        End With
+        destRow = destRow + 1
+    Next srcRow
+    
+    ' Format date column
+    wsDestination.Range("C2:C" & lastRow).NumberFormat = "mm/dd/yyyy"
+    
+    ' Call the CountUniqueDates subroutine to get the number of unique dates
+    CountUniqueDates wsDestination
+    
+    ' Notify the user that the process is complete
+    MsgBox "Data has been successfully imported and disseminated into the 'journal entry' sheet.", vbInformation
+    
+Exit Sub
+
+ErrorHandler:
+    MsgBox "An error occurred: " & Err.Description, vbExclamation
+End Sub
+
+Sub CountUniqueDates(wsDestination As Worksheet)
+    On Error Resume Next ' Skip errors in case of non-date values
+
+    Dim lastRow As Long
+    Dim dateCell As Range
+    Dim dateCountDict As Object
+    Dim dateValue As Variant
+    
+    ' Find the last row with data in the DATE column
+    lastRow = wsDestination.Cells(wsDestination.Rows.Count, 3).End(xlUp).Row
+    
+    ' Create a dictionary to store date counts
+    Set dateCountDict = CreateObject("Scripting.Dictionary")
+    
+    ' Loop through the DATE column to count occurrences of each date and assign counts to LINE_NO column
+    For Each dateCell In wsDestination.Range("C2:C" & lastRow)
+        If IsDate(dateCell.Value) Then
+            dateValue = CStr(dateCell.Value)
+            If Not dateCountDict.Exists(dateValue) Then
+                dateCountDict.Add dateValue, 1
+            Else
+                dateCountDict(dateValue) = dateCountDict(dateValue) + 1
+            End If
+            dateCell.Offset(0, 5).Value = dateCountDict(dateValue) ' Assign the count to LINE_NO column (5 columns right of DATE)
+        End If
+    Next dateCell
+
+    On Error GoTo 0 ' Restore default error handling
+End Sub
+
+
