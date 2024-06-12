@@ -10,13 +10,13 @@ Sub DistributeData()
     Set wsSource = ThisWorkbook.Sheets("Sheet1")
     
     ' Find the last row with data in the source sheet
-    lastRow = wsSource.Cells(wsSource.Rows.Count, "A").End(xlUp).Row
+    lastRow = wsSource.Cells(wsSource.Rows.count, "A").End(xlUp).Row
     
     ' Select all fields from the source sheet
     Set sourceRange = wsSource.Range("A1:D" & lastRow)
     
     ' Create a new sheet titled "Journal Entry"
-    Set wsDestination = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
+    Set wsDestination = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.count))
     wsDestination.Name = "Journal Entry"
     
     ' Define the columns in the new sheet
@@ -52,6 +52,7 @@ Sub DistributeData()
             ' Extract and assign values from Column A
             .Cells(destRow, 9).Value = Mid(sourceValue, 9, 4) ' ACCT_NO
             .Cells(destRow, 10).Value = Mid(sourceValue, 1, 1) ' LOCATION_ID
+            .Cells(destRow, 23).Value = Mid(sourceValue, 15, 1) ' SUBLOCATION_ID
             
             ' Check and adjust DEPT_ID
             Dim deptID As String
@@ -68,10 +69,7 @@ Sub DistributeData()
             
             ' Assign the fourth column from Sheet1 to the "DATE" column in the journal entry sheet
             .Cells(destRow, 3).Value = wsSource.Cells(srcRow, 4).Value ' DATE
-            
-            ' Assign Sublocation_ID from Column A (15th character) to SUBLOCATION_ID column in journal entry sheet
-            .Cells(destRow, 23).Value = Mid(sourceValue, 15, 1) ' SUBLOCATION_ID
-            
+                   
             ' Check if GL account is 4440, department is 514, and sublocation is 1
             Dim glAccount As String
             glAccount = Mid(sourceValue, 9, 4) ' Extract GL_ACCOUNT from Column A
@@ -112,7 +110,7 @@ Sub CountUniqueDates(wsDestination As Worksheet)
     Dim dateValue As Variant
     
     ' Find the last row with data in the DATE column
-    lastRow = wsDestination.Cells(wsDestination.Rows.Count, 3).End(xlUp).Row
+    lastRow = wsDestination.Cells(wsDestination.Rows.count, 3).End(xlUp).Row
     
     ' Create a dictionary to store date counts
     Set dateCountDict = CreateObject("Scripting.Dictionary")
