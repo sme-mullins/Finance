@@ -6,7 +6,7 @@ Sub DistributeData()
     Dim sourceRange As Range
     Dim lastRow As Long
     
-    ' Set the source worksheet
+    ' Set the source worksheet (adjust the sheet name as needed)
     Set wsSource = ThisWorkbook.Sheets("Sheet1")
     
     ' Find the last row with data in the source sheet
@@ -15,7 +15,7 @@ Sub DistributeData()
     ' Select all fields from the source sheet
     Set sourceRange = wsSource.Range("A1:D" & lastRow)
     
-    ' Create a new sheet titled "journal entry"
+    ' Create a new sheet titled "Journal Entry"
     Set wsDestination = ThisWorkbook.Sheets.Add(After:=ThisWorkbook.Sheets(ThisWorkbook.Sheets.Count))
     wsDestination.Name = "Journal Entry"
     
@@ -23,7 +23,7 @@ Sub DistributeData()
     Dim headers As Variant
     headers = Array("DONOTIMPORT", "JOURNAL", "DATE", "REVERSEDATE", "DESCRIPTION", "SOURCEENTITY", "REFERENCE_NO", "LINE_NO", "ACCT_NO", _
                     "LOCATION_ID", "DEPT_ID", "GLENTRY_CLASSID", "GLENTRY_CUSTOMERID", "GLENTRY_VENDORID", "GLENTRY_EMPLOYEEID", _
-                    "GLENTRY_ITEMID", "DEBIT", "CREDIT", "DOCUMENT", "MEMO", "STATE", "ALLOCATION_ID")
+                    "GLENTRY_ITEMID", "DEBIT", "CREDIT", "DOCUMENT", "MEMO", "STATE", "ALLOCATION_ID", "SUBLOCATION_ID")
                     
     Dim i As Long ' Change to Long for consistency
     For i = LBound(headers) To UBound(headers)
@@ -40,16 +40,50 @@ Sub DistributeData()
             Dim sourceValue As Variant
             sourceValue = wsSource.Cells(srcRow, 1).Value
             
+            ' Assign constant values to specified columns
+            .Cells(destRow, 2).Value = "GL" ' JOURNAL
+            .Cells(destRow, 6).Value = 1 ' SOURCEENTITY
+            .Cells(destRow, 21).Value = "Draft" ' STATE
+            .Cells(destRow, 12).Value = 1 ' GLENTRY_CLASSID
+            
+            ' Assign MEMO from Sheet1 Column C to MEMO column in journal entry sheet
+            .Cells(destRow, 20).Value = wsSource.Cells(srcRow, 3).Value ' MEMO
+            
             ' Extract and assign values from Column A
             .Cells(destRow, 9).Value = Mid(sourceValue, 9, 4) ' ACCT_NO
             .Cells(destRow, 10).Value = Mid(sourceValue, 1, 1) ' LOCATION_ID
-            .Cells(destRow, 11).Value = Mid(sourceValue, 5, 3) ' DEPT_ID
+            
+            ' Check and adjust DEPT_ID
+            Dim deptID As String
+            deptID = Mid(sourceValue, 5, 3) ' Extract DEPT_ID from Column A
+            
+            If Val(deptID) <= 399 Then
+                deptID = "100"
+            End If
+            
+            .Cells(destRow, 11).Value = deptID ' Assign adjusted DEPT_ID
             
             ' Assign the second column from Sheet1 to the "DEBIT" column in the journal entry sheet
             .Cells(destRow, 17).Value = wsSource.Cells(srcRow, 2).Value ' DEBIT
             
             ' Assign the fourth column from Sheet1 to the "DATE" column in the journal entry sheet
             .Cells(destRow, 3).Value = wsSource.Cells(srcRow, 4).Value ' DATE
+            
+            ' Assign Sublocation_ID from Column A (15th character) to SUBLOCATION_ID column in journal entry sheet
+            .Cells(destRow, 24).Value = Mid(sourceValue, 15, 1) ' SUBLOCATION_ID
+            
+            ' Check if GL account is 4440, department is 514, and sublocation is 1
+            Dim glAccount As String
+            glAccount = Mid(sourceValue, 9, 4) ' Extract GL_ACCOUNT from Column A
+            
+            If glAccount = "4440" And deptID = "514" And .Cells(destRow, 24).Value = "1" Then
+                glAccount = "4443"
+            End If
+            
+            .Cells(destRow, 9).Value = glAccount ' Assign adjusted GL_ACCOUNT
+            
+            ' Assign DESCRIPTION as 'Integration' + DATE
+            .Cells(destRow, 5).Value = "Integration " & Format(wsSource.Cells(srcRow, 4).Value, "mm/dd/yyyy")
         End With
         destRow = destRow + 1
     Next srcRow
@@ -61,7 +95,7 @@ Sub DistributeData()
     CountUniqueDates wsDestination
     
     ' Notify the user that the process is complete
-    MsgBox "Data has been successfully imported and disseminated into the 'journal entry' sheet.", vbInformation
+    MsgBox "Data has been successfully imported and disseminated into the 'Journal Entry' sheet.", vbInformation
     
 Exit Sub
 
@@ -95,8 +129,6 @@ Sub CountUniqueDates(wsDestination As Worksheet)
             dateCell.Offset(0, 5).Value = dateCountDict(dateValue) ' Assign the count to LINE_NO column (5 columns right of DATE)
         End If
     Next dateCell
-
+    
     On Error GoTo 0 ' Restore default error handling
 End Sub
-
-
