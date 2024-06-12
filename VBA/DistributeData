@@ -41,7 +41,7 @@ Sub DistributeData()
             sourceValue = wsSource.Cells(srcRow, 1).Value
             
             ' Assign constant values to specified columns
-            .Cells(destRow, 2).Value = "GL" ' JOURNAL
+            .Cells(destRow, 2).Value = "GJ" ' JOURNAL
             .Cells(destRow, 6).Value = 1 ' SOURCEENTITY
             .Cells(destRow, 21).Value = "Draft" ' STATE
             .Cells(destRow, 12).Value = 1 ' GLENTRY_CLASSID
