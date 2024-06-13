@@ -21,9 +21,7 @@ Sub DistributeData()
     
     ' Define the columns in the new sheet
     Dim headers As Variant
-    headers = Array("DONOTIMPORT", "JOURNAL", "DATE", "REVERSEDATE", "DESCRIPTION", "SOURCEENTITY", "REFERENCE_NO", "LINE_NO", "ACCT_NO", _
-                    "LOCATION_ID", "DEPT_ID", "GLENTRY_CLASSID", "GLENTRY_CUSTOMERID", "GLENTRY_VENDORID", "GLENTRY_EMPLOYEEID", _
-                    "GLENTRY_ITEMID", "DEBIT", "CREDIT", "DOCUMENT", "MEMO", "STATE", "ALLOCATION_ID", "SUBLOCATION_ID")
+    headers = Array("JOURNAL", "DATE", "DESCRIPTION", "SOURCEENTITY", "LINE_NO", "ACCT_NO", "LOCATION_ID", "DEPT_ID", "GLENTRY_CLASSID", "DEBIT", "CREDIT", "MEMO", "STATE")
                     
     Dim i As Long ' Change to Long for consistency
     For i = LBound(headers) To UBound(headers)
@@ -41,18 +39,18 @@ Sub DistributeData()
             sourceValue = wsSource.Cells(srcRow, 1).Value
             
             ' Assign constant values to specified columns
-            .Cells(destRow, 2).Value = "GJ" ' JOURNAL
-            .Cells(destRow, 6).Value = 1 ' SOURCEENTITY
-            .Cells(destRow, 21).Value = "Draft" ' STATE
-            .Cells(destRow, 12).Value = 1 ' GLENTRY_CLASSID
+            .Cells(destRow, 1).Value = "GJ" ' JOURNAL
+            .Cells(destRow, 4).Value = 1 ' SOURCEENTITY
+            .Cells(destRow, 13).Value = "Draft" ' STATE
+            .Cells(destRow, 9).Value = 1 ' GLENTRY_CLASSID
             
             ' Assign MEMO from Sheet1 Column C to MEMO column in journal entry sheet
-            .Cells(destRow, 20).Value = wsSource.Cells(srcRow, 3).Value ' MEMO
+            .Cells(destRow, 12).Value = wsSource.Cells(srcRow, 3).Value ' MEMO
             
             ' Extract and assign values from Column A
-            .Cells(destRow, 9).Value = Mid(sourceValue, 9, 4) ' ACCT_NO
-            .Cells(destRow, 10).Value = Mid(sourceValue, 1, 1) ' LOCATION_ID
-            .Cells(destRow, 23).Value = Mid(sourceValue, 15, 1) ' SUBLOCATION_ID
+            .Cells(destRow, 6).Value = Mid(sourceValue, 9, 4) ' ACCT_NO
+            .Cells(destRow, 7).Value = Mid(sourceValue, 1, 1) ' LOCATION_ID
+            .Cells(destRow, 14).Value = Mid(sourceValue, 15, 1) ' SUBLOCATION_ID
             
             ' Check and adjust DEPT_ID
             Dim deptID As String
@@ -62,32 +60,32 @@ Sub DistributeData()
                 deptID = "100"
             End If
             
-            .Cells(destRow, 11).Value = deptID ' Assign adjusted DEPT_ID
+            .Cells(destRow, 8).Value = deptID ' Assign adjusted DEPT_ID
             
             ' Assign the second column from Sheet1 to the "DEBIT" column in the journal entry sheet
-            .Cells(destRow, 17).Value = wsSource.Cells(srcRow, 2).Value ' DEBIT
+            .Cells(destRow, 10).Value = wsSource.Cells(srcRow, 2).Value ' DEBIT
             
             ' Assign the fourth column from Sheet1 to the "DATE" column in the journal entry sheet
-            .Cells(destRow, 3).Value = wsSource.Cells(srcRow, 4).Value ' DATE
+            .Cells(destRow, 2).Value = wsSource.Cells(srcRow, 4).Value ' DATE
                    
             ' Check if GL account is 4440, department is 514, and sublocation is 1
             Dim glAccount As String
             glAccount = Mid(sourceValue, 9, 4) ' Extract GL_ACCOUNT from Column A
             
-            If glAccount = "4440" And deptID = "514" And .Cells(destRow, 23).Value = "1" Then
+            If glAccount = "4440" And deptID = "514" And .Cells(destRow, 14).Value = "1" Then
                 glAccount = "4443"
             End If
             
-            .Cells(destRow, 9).Value = glAccount ' Assign adjusted GL_ACCOUNT
+            .Cells(destRow, 6).Value = glAccount ' Assign adjusted ACCT_NO from GL_ACCOUNT
             
             ' Assign DESCRIPTION as 'Integration' + DATE
-            .Cells(destRow, 5).Value = "Integration " & Format(wsSource.Cells(srcRow, 4).Value, "mm/dd/yyyy")
+            .Cells(destRow, 3).Value = "Integration " & Format(wsSource.Cells(srcRow, 4).Value, "mm/dd/yyyy")
         End With
         destRow = destRow + 1
     Next srcRow
     
     ' Format date column
-    wsDestination.Range("C2:C" & lastRow).NumberFormat = "mm/dd/yyyy"
+    wsDestination.Range("B2:B" & lastRow).NumberFormat = "mm/dd/yyyy"
     
     ' Call the CountUniqueDates subroutine to get the number of unique dates
     CountUniqueDates wsDestination
@@ -116,7 +114,7 @@ Sub CountUniqueDates(wsDestination As Worksheet)
     Set dateCountDict = CreateObject("Scripting.Dictionary")
     
     ' Loop through the DATE column to count occurrences of each date and assign counts to LINE_NO column
-    For Each dateCell In wsDestination.Range("C2:C" & lastRow)
+    For Each dateCell In wsDestination.Range("B2:B" & lastRow)
         If IsDate(dateCell.Value) Then
             dateValue = CStr(dateCell.Value)
             If Not dateCountDict.Exists(dateValue) Then
@@ -124,7 +122,7 @@ Sub CountUniqueDates(wsDestination As Worksheet)
             Else
                 dateCountDict(dateValue) = dateCountDict(dateValue) + 1
             End If
-            dateCell.Offset(0, 5).Value = dateCountDict(dateValue) ' Assign the count to LINE_NO column (5 columns right of DATE)
+            dateCell.Offset(0, 3).Value = dateCountDict(dateValue) ' Assign the count to LINE_NO column (3 columns right of DATE)
         End If
     Next dateCell
     
